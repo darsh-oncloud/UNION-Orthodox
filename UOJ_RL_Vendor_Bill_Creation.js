@@ -3,10 +3,10 @@
  * @NScriptType Restlet
  * @NModuleScope SameAccount
  */
-define(['N/record', 'N/format', 'N/log'], function (record, format, log) {
+define(['N/record', 'N/format', 'N/log', 'N/runtime'], function (record, format, log, runtime) {
 
   function isEmpty(v) {
-    return v === null || v === undefined || String(v).trim() === ''; //test
+    return v === null || v === undefined || String(v).trim() === '';
   }
 
   function isObject(o) {
@@ -35,10 +35,17 @@ define(['N/record', 'N/format', 'N/log'], function (record, format, log) {
     };
   }
 
-  function setBodyFields(recObj, payload) {
+  function getVendorCreditFormParam() {
+    return runtime.getCurrentScript().getParameter({
+      name: 'custscript_vendor_credit_form'
+    });
+  }
+
+  function setBodyFields(recObj, payload, skipCustomForm) {
     for (var k in payload) {
       if (!payload.hasOwnProperty(k)) continue;
       if (k === 'expense' || k === 'item' || k === 'customform1' || k === 'usertotal') continue;
+      if (skipCustomForm && k === 'customform') continue;
 
       var val = payload[k];
       if (isEmpty(val)) continue;
@@ -100,7 +107,20 @@ define(['N/record', 'N/format', 'N/log'], function (record, format, log) {
       isDynamic: true
     });
 
-    setBodyFields(recObj, payload);
+    var skipCustomForm = false;
+
+    if (recType === record.Type.VENDOR_CREDIT) {
+      var vendorCreditForm = getVendorCreditFormParam();
+      if (!isEmpty(vendorCreditForm)) {
+        recObj.setValue({
+          fieldId: 'customform',
+          value: vendorCreditForm
+        });
+      }
+      skipCustomForm = true;
+    }
+
+    setBodyFields(recObj, payload, skipCustomForm);
 
     if (expenseLines.length > 0) {
       for (var i = 0; i < expenseLines.length; i++) {
