@@ -6,7 +6,7 @@
 define(['N/record', 'N/format', 'N/log'], function (record, format, log) {
 
   function isEmpty(v) {
-    return v === null || v === undefined || String(v).trim() === '';
+    return v === null || v === undefined || String(v).trim() === ''; //test
   }
 
   function isObject(o) {
