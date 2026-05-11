@@ -61,21 +61,41 @@ define(['N/record', 'N/format', 'N/log', 'N/runtime'], function (record, format,
     }
   }
 
+  // function setLineFields(recObj, sublistId, lineObj) {
+  //   for (var k in lineObj) {
+  //     if (!lineObj.hasOwnProperty(k)) continue;
+  //     if (k === 'transactiontype') continue;
+
+  //     var val = lineObj[k];
+  //     if (isEmpty(val)) continue;
+
+  //     recObj.setCurrentSublistValue({
+  //       sublistId: sublistId,
+  //       fieldId: k,
+  //       value: val
+  //     });
+  //   }
+  // }
+
   function setLineFields(recObj, sublistId, lineObj) {
-    for (var k in lineObj) {
-      if (!lineObj.hasOwnProperty(k)) continue;
-      if (k === 'transactiontype') continue;
+  for (var k in lineObj) {
+    if (!lineObj.hasOwnProperty(k)) continue;
+    if (k === 'transactiontype') continue;
 
-      var val = lineObj[k];
-      if (isEmpty(val)) continue;
+    var val = lineObj[k];
+    if (isEmpty(val)) continue;
 
-      recObj.setCurrentSublistValue({
-        sublistId: sublistId,
-        fieldId: k,
-        value: val
-      });
+    if (isDateField(k)) {
+      val = parseNsDate(val);
     }
+
+    recObj.setCurrentSublistValue({
+      sublistId: sublistId,
+      fieldId: k,
+      value: val
+    });
   }
+}
 
   function splitLines(lines) {
     var out = {
